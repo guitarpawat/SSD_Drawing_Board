@@ -24,19 +24,29 @@ public class DrawingBoard extends JPanel {
 	}
 	
 	public void addGObject(GObject gObject) {
-		// TODO: Implement this method.
+		gObjects.add(gObject);
+                repaint();
 	}
 	
 	public void groupAll() {
-		// TODO: Implement this method.
+                CompositeGObject cpt = new CompositeGObject();
+                for(GObject item : gObjects) {
+                    cpt.add(item);
+                }
+                cpt.selected();
+                gObjects.clear();
+                gObjects.add(cpt);
+                repaint();
 	}
 
 	public void deleteSelected() {
-		// TODO: Implement this method.
+                if(target != null) gObjects.remove(target);
+                repaint();
 	}
 	
 	public void clear() {
-		// TODO: Implement this method.
+		gObjects.clear();
+                repaint();
 	}
 	
 	@Override
@@ -72,20 +82,46 @@ public class DrawingBoard extends JPanel {
 
 	class MAdapter extends MouseAdapter {
 
-		// TODO: You need some variables here
-		
+                private int x;
+                private int y;
+                
 		private void deselectAll() {
-			// TODO: Implement this method.
+                        if(target != null) target.deselected();
+			target = null;
+                        repaint();
 		}
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
-			// TODO: Implement this method.
+                        int x = e.getX();
+                        int y = e.getY();
+                        this.x = x;
+                        this.y = y;
+                        boolean hit = false;
+                        for(int i=gObjects.size()-1; i>=0; i--) {
+                            GObject item = gObjects.get(i);
+                            if(item.pointerHit(x, y)) {
+                                if(target != null) target.deselected();
+                                item.selected();
+                                target = item;
+                                gObjects.remove(target);
+                                gObjects.add(target);
+                                hit = true;
+                                break;
+                            }
+                        }
+                        if(!hit) deselectAll();
+                        repaint();
 		}
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			// TODO: Implement this method.
+                        int x = e.getX();
+                        int y = e.getY();
+                        if(target != null) target.move(x-this.x, y-this.y);
+                        this.x = x;
+                        this.y = y;
+                        repaint();
 		}
 	}
 	
